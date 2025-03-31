@@ -146,10 +146,10 @@ button {
 .btn-group {
   position: absolute;
   right: 8px;
-  top: 8px;
+  bottom: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  gap: 8px;
   z-index: 1;
 }
 
