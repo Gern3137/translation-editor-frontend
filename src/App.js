@@ -80,7 +80,7 @@ function App() {
     setIsTranslating(true);
 
     try {
-      const response = await axios.post("http://localhost:8000/upload/", formData);
+      const response = await axios.post("https://translation-editor-backend.onrender.com/upload/", formData);
       const original = response.data.pairs.map((pair) => pair.original);
       const translated = response.data.pairs.map((pair) => pair.translated);
       setEnglishBlocks(original);
@@ -99,7 +99,7 @@ function App() {
     if (!sentence) return;
 
     try {
-      const response = await axios.post("http://localhost:8000/retranslate/", {
+      const response = await axios.post("https://translation-editor-backend.onrender.com/retranslate/", {
         sentences: [sentence],
         user_prompt: useCustomPrompt ? customPrompt : "",
       });
