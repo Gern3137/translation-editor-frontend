@@ -58,6 +58,7 @@ textarea {
   border: 1px solid #ccc;
   resize: vertical;
   width: 100%;
+  box-sizing: border-box;
 }
 
 input[type="file"] {

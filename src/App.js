@@ -300,19 +300,20 @@ function App() {
 
       {editing && (
         <div className="editor-wrapper">
-          <div className="column-wrapper">
-            <h2>English</h2>
-            <div className="column english-column" ref={originalRef}>
-              {renderEditorBlock(englishBlocks, true)}
-            </div>
-          </div>
+<div className="column-wrapper">
+  <div className="column english-column" ref={originalRef}>
+    <h2>English</h2>
+    {renderEditorBlock(englishBlocks, true)}
+  </div>
+</div>
 
-          <div className="column-wrapper">
-            <h2>Japanese</h2>
-            <div className="column japanese-column" ref={translatedRef}>
-              {renderEditorBlock(japaneseBlocks, false)}
-            </div>
-          </div>
+<div className="column-wrapper">
+  <div className="column japanese-column" ref={translatedRef}>
+    <h2>Japanese</h2>
+    {renderEditorBlock(japaneseBlocks, false)}
+  </div>
+</div>
+
         </div>
       )}
     </div>
