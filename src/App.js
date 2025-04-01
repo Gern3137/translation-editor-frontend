@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
-import { ArrowUp, SplitSquareVertical, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowUp, SplitSquareVertical, RefreshCw, Trash2, RotateCcw } from "lucide-react";
 
 function placeCaretAtEnd(el) {
   el.focus();
@@ -24,10 +24,10 @@ function App() {
   const [useSkipWords, setUseSkipWords] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
   const [useCustomPrompt, setUseCustomPrompt] = useState(false);
+  const [undoDelete, setUndoDelete] = useState(null);
 
   const originalRef = useRef(null);
   const translatedRef = useRef(null);
-
   const englishRefs = useRef({});
   const japaneseRefs = useRef({});
 
@@ -143,21 +143,11 @@ function App() {
   };
 
   const mergeBlock = (index, isEnglish) => {
-    const en = [...englishBlocks];
-    const jp = [...japaneseBlocks];
-
-    if (index < en.length - 1) {
-      if (isEnglish) {
-        en[index] += " " + en[index + 1];
-        en.splice(index + 1, 1);
-        jp.splice(index + 1, 1);
-        setEnglishBlocks(en);
-        setJapaneseBlocks(jp);
-      } else {
-        jp[index] += " " + jp[index + 1];
-        jp.splice(index + 1, 1);
-        setJapaneseBlocks(jp);
-      }
+    const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
+    if (index < blocks.length - 1) {
+      blocks[index] += " " + blocks[index + 1];
+      blocks.splice(index + 1, 1);
+      isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
     }
   };
 
@@ -171,10 +161,21 @@ function App() {
     }
   };
 
-  const deleteBlock = (index, isEnglish) => {
-    const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
-    blocks.splice(index, 1);
-    isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
+  const deleteJPBlock = (index) => {
+    const backup = japaneseBlocks[index];
+    const updated = [...japaneseBlocks];
+    updated.splice(index, 1);
+    setJapaneseBlocks(updated);
+    setUndoDelete({ index, value: backup });
+    setTimeout(() => setUndoDelete(null), 5000);
+  };
+
+  const undoDeleteBlock = () => {
+    if (!undoDelete) return;
+    const updated = [...japaneseBlocks];
+    updated.splice(undoDelete.index, 0, undoDelete.value);
+    setJapaneseBlocks(updated);
+    setUndoDelete(null);
   };
 
   const handleExport = () => {
@@ -219,21 +220,22 @@ function App() {
 
         {activeIndex === i && (
           <div className="btn-group">
-            <button onClick={() => splitBlock(i, isEnglish)} className="btn-split">
-              <SplitSquareVertical size={14} />
-            </button>
-            {i < blocks.length - 1 && (
-              <button onClick={() => mergeBlock(i, isEnglish)} className="btn-merge">
-                <ArrowUp size={14} />
-              </button>
-            )}
-            {isEnglish && (
-              <button onClick={() => retranslateBlock(i)} className="btn-retranslate">
-                <RefreshCw size={14} />
-              </button>
-            )}
-            {!isEnglish && (
-              <button onClick={() => deleteBlock(i, isEnglish)} className="btn-delete">
+            {isEnglish ? (
+              <>
+                <button onClick={() => splitBlock(i, true)} className="btn-action">
+                  <SplitSquareVertical size={14} />
+                </button>
+                {i < englishBlocks.length - 1 && (
+                  <button onClick={() => mergeBlock(i, true)} className="btn-action">
+                    <ArrowUp size={14} />
+                  </button>
+                )}
+                <button onClick={() => retranslateBlock(i)} className="btn-action">
+                  <RefreshCw size={14} />
+                </button>
+              </>
+            ) : (
+              <button onClick={() => deleteJPBlock(i)} className="btn-action">
                 <Trash2 size={14} />
               </button>
             )}
@@ -249,6 +251,14 @@ function App() {
         <img src="/logo.png" alt="Logo" className="logo" />
         <h1 className="title">Translation Editor</h1>
       </div>
+
+      {undoDelete && (
+        <div className="undo-wrapper">
+          <button className="btn-primary" onClick={undoDeleteBlock}>
+            <RotateCcw size={14} /> Undo Delete
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
         <div className="form-group">
