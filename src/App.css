@@ -25,7 +25,7 @@ body {
 }
 
 .title {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: bold;
   color: #0b225c;
 }
@@ -107,7 +107,7 @@ button {
 .column-wrapper h2 {
   text-align: center;
   margin: 0 0 8px 0;
-  font-size: 20px;
+  font-size: 32px;
   font-weight: bold;
   color: #0b225c;
   background: transparent;
