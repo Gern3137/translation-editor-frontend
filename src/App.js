@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
-import { ArrowUp, SplitSquareVertical, RefreshCw } from "lucide-react";
+import { ArrowUp, SplitSquareVertical, RefreshCw, Trash2 } from "lucide-react";
 
 function placeCaretAtEnd(el) {
   el.focus();
@@ -143,11 +143,21 @@ function App() {
   };
 
   const mergeBlock = (index, isEnglish) => {
-    const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
-    if (index < blocks.length - 1) {
-      blocks[index] += " " + blocks[index + 1];
-      blocks.splice(index + 1, 1);
-      isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
+    const en = [...englishBlocks];
+    const jp = [...japaneseBlocks];
+
+    if (index < en.length - 1) {
+      if (isEnglish) {
+        en[index] += " " + en[index + 1];
+        en.splice(index + 1, 1);
+        jp.splice(index + 1, 1);
+        setEnglishBlocks(en);
+        setJapaneseBlocks(jp);
+      } else {
+        jp[index] += " " + jp[index + 1];
+        jp.splice(index + 1, 1);
+        setJapaneseBlocks(jp);
+      }
     }
   };
 
@@ -159,6 +169,12 @@ function App() {
       blocks.splice(index, 1, ...parts);
       isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
     }
+  };
+
+  const deleteBlock = (index, isEnglish) => {
+    const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
+    blocks.splice(index, 1);
+    isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
   };
 
   const handleExport = () => {
@@ -201,19 +217,26 @@ function App() {
           {s}
         </div>
 
-        {activeIndex === i && isEnglish && (
+        {activeIndex === i && (
           <div className="btn-group">
-            <button onClick={() => splitBlock(i, true)} className="btn-split">
+            <button onClick={() => splitBlock(i, isEnglish)} className="btn-split">
               <SplitSquareVertical size={14} />
             </button>
-            {i < englishBlocks.length - 1 && (
-              <button onClick={() => mergeBlock(i, true)} className="btn-merge">
+            {i < blocks.length - 1 && (
+              <button onClick={() => mergeBlock(i, isEnglish)} className="btn-merge">
                 <ArrowUp size={14} />
               </button>
             )}
-            <button onClick={() => retranslateBlock(i)} className="btn-retranslate">
-              <RefreshCw size={14} />
-            </button>
+            {isEnglish && (
+              <button onClick={() => retranslateBlock(i)} className="btn-retranslate">
+                <RefreshCw size={14} />
+              </button>
+            )}
+            {!isEnglish && (
+              <button onClick={() => deleteBlock(i, isEnglish)} className="btn-delete">
+                <Trash2 size={14} />
+              </button>
+            )}
           </div>
         )}
       </div>
