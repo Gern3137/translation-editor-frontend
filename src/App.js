@@ -208,7 +208,7 @@ function App() {
         </div>
 
         {activeIndex === i && (
-          <div className="btn-group-horizontal">
+          <div className="btn-group">
             <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
               <SplitSquareVertical size={14} />
             </button>
