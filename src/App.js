@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
-import { ArrowUp, SplitSquareVertical, RefreshCw, Trash2, RotateCcw } from "lucide-react";
+import { ArrowUp, SplitSquareVertical, RefreshCw, Trash2 } from "lucide-react";
 
 function placeCaretAtEnd(el) {
   el.focus();
@@ -24,10 +24,10 @@ function App() {
   const [useSkipWords, setUseSkipWords] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
   const [useCustomPrompt, setUseCustomPrompt] = useState(false);
-  const [undoDelete, setUndoDelete] = useState(null);
 
   const originalRef = useRef(null);
   const translatedRef = useRef(null);
+
   const englishRefs = useRef({});
   const japaneseRefs = useRef({});
 
@@ -162,20 +162,9 @@ function App() {
   };
 
   const deleteJPBlock = (index) => {
-    const backup = japaneseBlocks[index];
     const updated = [...japaneseBlocks];
     updated.splice(index, 1);
     setJapaneseBlocks(updated);
-    setUndoDelete({ index, value: backup });
-    setTimeout(() => setUndoDelete(null), 5000);
-  };
-
-  const undoDeleteBlock = () => {
-    if (!undoDelete) return;
-    const updated = [...japaneseBlocks];
-    updated.splice(undoDelete.index, 0, undoDelete.value);
-    setJapaneseBlocks(updated);
-    setUndoDelete(null);
   };
 
   const handleExport = () => {
@@ -219,21 +208,19 @@ function App() {
         </div>
 
         {activeIndex === i && (
-          <div className="btn-group">
+          <div className="btn-group-horizontal">
+            <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
+              <SplitSquareVertical size={14} />
+            </button>
+            {i < blocks.length - 1 && (
+              <button onClick={() => mergeBlock(i, isEnglish)} className="btn-action">
+                <ArrowUp size={14} />
+              </button>
+            )}
             {isEnglish ? (
-              <>
-                <button onClick={() => splitBlock(i, true)} className="btn-action">
-                  <SplitSquareVertical size={14} />
-                </button>
-                {i < englishBlocks.length - 1 && (
-                  <button onClick={() => mergeBlock(i, true)} className="btn-action">
-                    <ArrowUp size={14} />
-                  </button>
-                )}
-                <button onClick={() => retranslateBlock(i)} className="btn-action">
-                  <RefreshCw size={14} />
-                </button>
-              </>
+              <button onClick={() => retranslateBlock(i)} className="btn-action">
+                <RefreshCw size={14} />
+              </button>
             ) : (
               <button onClick={() => deleteJPBlock(i)} className="btn-action">
                 <Trash2 size={14} />
@@ -251,14 +238,6 @@ function App() {
         <img src="/logo.png" alt="Logo" className="logo" />
         <h1 className="title">Translation Editor</h1>
       </div>
-
-      {undoDelete && (
-        <div className="undo-wrapper">
-          <button className="btn-primary" onClick={undoDeleteBlock}>
-            <RotateCcw size={14} /> Undo Delete
-          </button>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
         <div className="form-group">
