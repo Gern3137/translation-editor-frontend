@@ -72,13 +72,14 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) return;
-
+  
     const formData = new FormData();
     formData.append("file", file);
     formData.append("user_prompt", useCustomPrompt ? customPrompt : "");
-
+    formData.append("skip_words", useSkipWords ? skipWords : "");
+  
     setIsTranslating(true);
-
+  
     try {
       const response = await axios.post("https://translation-editor-backend.onrender.com/upload/", formData);
       const original = response.data.pairs.map((pair) => pair.original);
@@ -90,9 +91,10 @@ function App() {
       console.error("Translation error:", err);
       alert("Translation failed: " + (err.response?.data?.detail || err.message));
     }
-
+  
     setIsTranslating(false);
   };
+  
 
   const retranslateBlock = async (index) => {
     const sentence = englishBlocks[index];
@@ -147,25 +149,47 @@ function App() {
     if (index < blocks.length - 1) {
       blocks[index] += " " + blocks[index + 1];
       blocks.splice(index + 1, 1);
+  
+      const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
+      otherBlocks.splice(index + 1, 1);
+  
       isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
+      isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
     }
   };
+  
 
   const splitBlock = (index, isEnglish) => {
     const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
     const sentence = blocks[index];
+  
     const parts = sentence.match(/[^。！？.?!]+[。！？.?!]?/g)?.map((s) => s.trim()) || [];
+  
     if (parts.length > 1) {
       blocks.splice(index, 1, ...parts);
+  
+      const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
+      const replacement = otherBlocks[index] || "";
+      const mirrors = new Array(parts.length).fill(replacement);
+      otherBlocks.splice(index, 1, ...mirrors);
+  
       isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
+      isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
     }
   };
+  
 
-  const deleteJPBlock = (index) => {
-    const updated = [...japaneseBlocks];
-    updated.splice(index, 1);
-    setJapaneseBlocks(updated);
+  const deleteBlock = (index, isEnglish) => {
+    const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
+    const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
+  
+    blocks.splice(index, 1);
+    otherBlocks.splice(index, 1);
+  
+    isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
+    isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
   };
+  
 
   const handleExport = () => {
     const content = japaneseBlocks.join("\n\n");
@@ -186,11 +210,36 @@ function App() {
     setEditing(false);
   };
 
+  const handleKeyDown = (e, index, isEnglish) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+  
+      const direction = e.key === "ArrowDown" ? 1 : -1;
+      const nextIndex = index + direction;
+  
+      const blocks = isEnglish ? englishBlocks : japaneseBlocks;
+      const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
+  
+      if (nextIndex >= 0 && nextIndex < blocks.length) {
+        setActiveIndex(nextIndex);
+  
+        setTimeout(() => {
+          const nextEl = refMap[nextIndex];
+          if (nextEl) placeCaretAtEnd(nextEl);
+        }, 0);
+      }
+    }
+  };
+
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
 
     return blocks.map((s, i) => (
-      <div key={`${isEnglish ? "eng" : "jp"}-${i}`} className={`block ${i === activeIndex ? "highlighted" : ""}`} data-index={i}>
+      <div
+        key={`${isEnglish ? "eng" : "jp"}-${i}`}
+        className={`block ${i === activeIndex ? "highlighted" : ""}`}
+        data-index={i}
+      >
         <div
           ref={(el) => {
             if (el) refMap[i] = el;
@@ -199,6 +248,7 @@ function App() {
           suppressContentEditableWarning
           onClick={handleCaretChange}
           onKeyUp={handleCaretChange}
+          onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}  // ← ✅ Add this
           onInput={() => {}}
           onBlur={() => handleBlur(i, isEnglish)}
           className="editable"
@@ -206,6 +256,7 @@ function App() {
         >
           {s}
         </div>
+    
 
         {activeIndex === i && (
           <div className="btn-group">
@@ -222,7 +273,8 @@ function App() {
                 <RefreshCw size={14} />
               </button>
             ) : (
-              <button onClick={() => deleteJPBlock(i)} className="btn-action">
+              <button onClick={() => deleteBlock(i, false)} className="btn-action">
+
                 <Trash2 size={14} />
               </button>
             )}
