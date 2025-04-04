@@ -211,6 +211,7 @@ function App() {
   };
 
   const handleKeyDown = (e, index, isEnglish) => {
+    // ⬆️⬇️ Arrow key navigation
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
   
@@ -228,16 +229,18 @@ function App() {
           if (nextEl) placeCaretAtEnd(nextEl);
         }, 0);
       }
+  
+      return; // ✅ prevent further code from running
     }
   
-    // ✅ If on JP block and user presses Enter (without Shift), split
+    // ⏎ Enter splits JP block
     if (!isEnglish && e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent newline
-      splitBlock(index, false); // Split JP block
+      e.preventDefault(); // ✅ block newline/div
+      splitBlock(index, false);
+      return; // ✅ stop further handling
     }
   
-    // ✅ If user presses Shift+Enter, allow new line (default behavior)
-    // No need to handle explicitly — just don't preventDefault
+    // Shift+Enter: let browser handle new line (do nothing)
   };
   
 
