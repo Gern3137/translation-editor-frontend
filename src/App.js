@@ -229,7 +229,17 @@ function App() {
         }, 0);
       }
     }
+  
+    // ✅ If on JP block and user presses Enter (without Shift), split
+    if (!isEnglish && e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline
+      splitBlock(index, false); // Split JP block
+    }
+  
+    // ✅ If user presses Shift+Enter, allow new line (default behavior)
+    // No need to handle explicitly — just don't preventDefault
   };
+  
 
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
