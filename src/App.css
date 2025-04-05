@@ -162,22 +162,19 @@ button {
 }
 
 .btn-action {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 6px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 2px 2px 5px #d1d9e6, -2px -2px 5px #ffffff;
-  transition: box-shadow 0.2s ease;
+  background: rgba(255, 255, 255, 0.6); /* Slight white background with 80% opacity */
+  backdrop-filter: blur(4px); /* Optional: softens what's behind it */
+  border: none;
+  border-radius: 6px;
+  padding: 4px;
+  opacity: 0.7; /* Makes the button itself semi-transparent */
+  transition: opacity 0.2s ease;
 }
 
 .btn-action:hover {
-  box-shadow: inset 2px 2px 5px #d1d9e6, inset -2px -2px 5px #ffffff;
+  opacity: 1; /* Full opacity on hover */
 }
+
 
 textarea[disabled] {
   background-color: #f0f0f0;
