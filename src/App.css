@@ -87,7 +87,9 @@ button {
 
 .editor-wrapper {
   display: flex;
-  gap: 28px;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
 }
 
 .column-wrapper {
@@ -97,12 +99,31 @@ button {
 .column {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.08), -4px -4px 10px rgba(255, 255, 255, 0.6);
-  border: 1px solid #e0e5ec;
+  gap: 8px;
 }
+
+.block {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  padding: 12px;
+  position: relative;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+.block.highlighted {
+  outline: 2px solid #5b9dff;
+  background-color: #eef5ff;
+}
+
+.editable {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 40px;
+  outline: none;
+}
+
 
 .column-wrapper h2 {
   text-align: center;
