@@ -87,41 +87,44 @@ button {
 
 .editor-wrapper {
   display: flex;
-  flex-direction: row;
-  gap: 20px;
+  gap: 40px;
   align-items: flex-start;
 }
 
 .column-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  padding: 16px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background: #fafafa;
+  gap: 0; /* Remove spacing between blocks */
+  min-height: 80vh;
+  overflow-y: auto;
 }
 
 .block {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  padding: 12px;
+  padding: 4px 0;
   position: relative;
-  min-height: 80px;
-  line-height: 1.6;
-}
-
-.block.highlighted {
-  outline: 2px solid #5b9dff;
-  background-color: #eef5ff;
+  border: none;
+  box-shadow: none;
+  background: none;
+  margin: 0;
+  border-radius: 0;
 }
 
 .editable {
   white-space: pre-wrap;
   word-break: break-word;
-  min-height: 40px;
   outline: none;
+  padding: 4px 8px;
+  line-height: 1.7;
 }
 
 
