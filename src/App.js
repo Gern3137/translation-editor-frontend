@@ -72,14 +72,14 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) return;
-  
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("user_prompt", useCustomPrompt ? customPrompt : "");
     formData.append("skip_words", useSkipWords ? skipWords : "");
-  
+
     setIsTranslating(true);
-  
+
     try {
       const response = await axios.post("https://translation-editor-backend.onrender.com/upload/", formData);
       const original = response.data.pairs.map((pair) => pair.original);
@@ -91,10 +91,9 @@ function App() {
       console.error("Translation error:", err);
       alert("Translation failed: " + (err.response?.data?.detail || err.message));
     }
-  
+
     setIsTranslating(false);
   };
-  
 
   const retranslateBlock = async (index) => {
     const sentence = englishBlocks[index];
@@ -149,47 +148,25 @@ function App() {
     if (index < blocks.length - 1) {
       blocks[index] += " " + blocks[index + 1];
       blocks.splice(index + 1, 1);
-  
-      const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
-      otherBlocks.splice(index + 1, 1);
-  
       isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
-      isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
     }
   };
-  
 
   const splitBlock = (index, isEnglish) => {
     const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
     const sentence = blocks[index];
-  
     const parts = sentence.match(/[^。！？.?!]+[。！？.?!]?/g)?.map((s) => s.trim()) || [];
-  
     if (parts.length > 1) {
       blocks.splice(index, 1, ...parts);
-  
-      const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
-      const replacement = otherBlocks[index] || "";
-      const mirrors = new Array(parts.length).fill(replacement);
-      otherBlocks.splice(index, 1, ...mirrors);
-  
       isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
-      isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
     }
   };
-  
 
   const deleteBlock = (index, isEnglish) => {
     const blocks = isEnglish ? [...englishBlocks] : [...japaneseBlocks];
-    const otherBlocks = isEnglish ? [...japaneseBlocks] : [...englishBlocks];
-  
     blocks.splice(index, 1);
-    otherBlocks.splice(index, 1);
-  
     isEnglish ? setEnglishBlocks(blocks) : setJapaneseBlocks(blocks);
-    isEnglish ? setJapaneseBlocks(otherBlocks) : setEnglishBlocks(otherBlocks);
   };
-  
 
   const handleExport = () => {
     const content = japaneseBlocks.join("\n\n");
@@ -211,42 +188,30 @@ function App() {
   };
 
   const handleKeyDown = (e, index, isEnglish) => {
-    // ⬆️⬇️ Arrow key navigation
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
-  
       const direction = e.key === "ArrowDown" ? 1 : -1;
       const nextIndex = index + direction;
-  
       const blocks = isEnglish ? englishBlocks : japaneseBlocks;
       const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
-  
       if (nextIndex >= 0 && nextIndex < blocks.length) {
         setActiveIndex(nextIndex);
-  
         setTimeout(() => {
           const nextEl = refMap[nextIndex];
           if (nextEl) placeCaretAtEnd(nextEl);
         }, 0);
       }
-  
-      return; // ✅ prevent further code from running
+      return;
     }
-  
-    // ⏎ Enter splits JP block
     if (!isEnglish && e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // ✅ block newline/div
+      e.preventDefault();
       splitBlock(index, false);
-      return; // ✅ stop further handling
+      return;
     }
-  
-    // Shift+Enter: let browser handle new line (do nothing)
   };
-  
 
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
-
     return blocks.map((s, i) => (
       <div
         key={`${isEnglish ? "eng" : "jp"}-${i}`}
@@ -261,7 +226,7 @@ function App() {
           suppressContentEditableWarning
           onClick={handleCaretChange}
           onKeyUp={handleCaretChange}
-          onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}  // ← ✅ Add this
+          onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}
           onInput={() => {}}
           onBlur={() => handleBlur(i, isEnglish)}
           className="editable"
@@ -269,8 +234,6 @@ function App() {
         >
           {s}
         </div>
-    
-
         {activeIndex === i && (
           <div className="btn-group">
             <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
@@ -287,7 +250,6 @@ function App() {
               </button>
             ) : (
               <button onClick={() => deleteBlock(i, false)} className="btn-action">
-
                 <Trash2 size={14} />
               </button>
             )}
@@ -307,16 +269,10 @@ function App() {
       <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
         <div className="form-group">
           <input type="file" onChange={handleFileChange} accept=".pdf" />
-
           <label className="form-check">
-            <input
-              type="checkbox"
-              checked={useSkipWords}
-              onChange={(e) => setUseSkipWords(e.target.checked)}
-            />
+            <input type="checkbox" checked={useSkipWords} onChange={(e) => setUseSkipWords(e.target.checked)} />
             Skip Words
           </label>
-
           {useSkipWords && (
             <textarea
               rows="4"
@@ -325,16 +281,10 @@ function App() {
               placeholder="Enter words or phrases to skip, one per line"
             />
           )}
-
           <label className="form-check">
-            <input
-              type="checkbox"
-              checked={useCustomPrompt}
-              onChange={(e) => setUseCustomPrompt(e.target.checked)}
-            />
+            <input type="checkbox" checked={useCustomPrompt} onChange={(e) => setUseCustomPrompt(e.target.checked)} />
             Custom Prompt
           </label>
-
           {useCustomPrompt && (
             <textarea
               rows="3"
@@ -348,7 +298,6 @@ function App() {
         <button type="submit" className="btn-primary" style={{ marginTop: 16 }}>
           Translate
         </button>
-
         {editing && (
           <>
             <button type="button" onClick={handleExport} className="btn-primary">
@@ -371,7 +320,6 @@ function App() {
               {renderEditorBlock(englishBlocks, true)}
             </div>
           </div>
-
           <div className="column-wrapper">
             <h2>Japanese</h2>
             <div className="column japanese-column" ref={translatedRef}>
