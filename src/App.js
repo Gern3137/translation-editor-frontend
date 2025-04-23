@@ -27,7 +27,6 @@ function App() {
 
   const originalRef = useRef(null);
   const translatedRef = useRef(null);
-
   const englishRefs = useRef({});
   const japaneseRefs = useRef({});
 
@@ -50,10 +49,7 @@ function App() {
 
   useEffect(() => {
     if (japaneseBlocks.length > 0 || englishBlocks.length > 0) {
-      const payload = {
-        english: englishBlocks,
-        japanese: japaneseBlocks,
-      };
+      const payload = { english: englishBlocks, japanese: japaneseBlocks };
       localStorage.setItem("savedTranslation", JSON.stringify(payload));
     }
   }, [englishBlocks, japaneseBlocks]);
@@ -65,9 +61,7 @@ function App() {
     }
   }, [activeIndex]);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
+  const handleFileChange = (e) => setFile(e.target.files[0]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -206,18 +200,13 @@ function App() {
     if (!isEnglish && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       splitBlock(index, false);
-      return;
     }
   };
 
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
     return blocks.map((s, i) => (
-      <div
-        key={`${isEnglish ? "eng" : "jp"}-${i}`}
-        className={`block ${i === activeIndex ? "highlighted" : ""}`}
-        data-index={i}
-      >
+      <div key={`${isEnglish ? "eng" : "jp"}-${i}`} className={`block ${i === activeIndex ? "highlighted" : ""}`} data-index={i}>
         <div
           ref={(el) => {
             if (el) refMap[i] = el;
@@ -234,6 +223,7 @@ function App() {
         >
           {s}
         </div>
+
         {activeIndex === i && (
           <div className="btn-group">
             <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
@@ -298,6 +288,7 @@ function App() {
         <button type="submit" className="btn-primary" style={{ marginTop: 16 }}>
           Translate
         </button>
+
         {editing && (
           <>
             <button type="button" onClick={handleExport} className="btn-primary">
