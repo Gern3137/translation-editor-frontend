@@ -27,6 +27,7 @@ function App() {
 
   const originalRef = useRef(null);
   const translatedRef = useRef(null);
+
   const englishRefs = useRef({});
   const japaneseRefs = useRef({});
 
@@ -61,7 +62,9 @@ function App() {
     }
   }, [activeIndex]);
 
-  const handleFileChange = (e) => setFile(e.target.files[0]);
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,8 +72,12 @@ function App() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("user_prompt", useCustomPrompt ? customPrompt : "");
-    formData.append("skip_words", useSkipWords ? skipWords : "");
+    if (useCustomPrompt && customPrompt.trim() !== "") {
+      formData.append("user_prompt", customPrompt.trim());
+    }
+    if (useSkipWords && skipWords.trim() !== "") {
+      formData.append("skip_words", skipWords.trim());
+    }
 
     setIsTranslating(true);
 
@@ -200,13 +207,18 @@ function App() {
     if (!isEnglish && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       splitBlock(index, false);
+      return;
     }
   };
 
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
     return blocks.map((s, i) => (
-      <div key={`${isEnglish ? "eng" : "jp"}-${i}`} className={`block ${i === activeIndex ? "highlighted" : ""}`} data-index={i}>
+      <div
+        key={`${isEnglish ? "eng" : "jp"}-${i}`}
+        className={`block ${i === activeIndex ? "highlighted" : ""}`}
+        data-index={i}
+      >
         <div
           ref={(el) => {
             if (el) refMap[i] = el;
@@ -223,7 +235,6 @@ function App() {
         >
           {s}
         </div>
-
         {activeIndex === i && (
           <div className="btn-group">
             <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
@@ -288,7 +299,6 @@ function App() {
         <button type="submit" className="btn-primary" style={{ marginTop: 16 }}>
           Translate
         </button>
-
         {editing && (
           <>
             <button type="button" onClick={handleExport} className="btn-primary">
