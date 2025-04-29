@@ -135,27 +135,36 @@ function App() {
 
   const handleLinkToOther = (index, isEnglish) => {
     if (!selectedForLinking || selectedForLinking.isEnglish === isEnglish) return;
-
+  
     const enIndex = selectedForLinking.isEnglish ? selectedForLinking.index : index;
     const jpIndex = selectedForLinking.isEnglish ? index : selectedForLinking.index;
-
-    setLinkedPairs((prev) => ({ ...prev, [enIndex]: jpIndex }));
+  
+    setJapaneseBlocks((prevJP) => {
+      const updatedJP = [...prevJP];
+      const textToMove = updatedJP[jpIndex];
+  
+      if (jpIndex < enIndex) {
+        // Moving downward
+        updatedJP.splice(jpIndex, 1);          // remove JP block from old position
+        updatedJP.splice(enIndex - 1, 0, textToMove); // insert at enIndex-1 (because after removal, indexes shifted)
+      } else if (jpIndex > enIndex) {
+        // Moving upward
+        updatedJP.splice(jpIndex, 1);          // remove JP block from old position
+        updatedJP.splice(enIndex, 0, textToMove);  // insert at enIndex
+      }
+  
+      // If number of JP blocks is now less than EN blocks, add an empty block at the end
+      if (updatedJP.length < englishBlocks.length) {
+        updatedJP.push("");
+      }
+  
+      return updatedJP;
+    });
+  
     setSelectedForLinking(null);
   };
-
-  const handleBlur = (index, isEnglish) => {
-    const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
-    const newText = refMap[index]?.innerText || "";
-
-    const blocks = isEnglish ? englishBlocks : japaneseBlocks;
-    if (blocks[index] === newText) return;
-
-    const updated = [...blocks];
-    updated[index] = newText;
-
-    isEnglish ? setEnglishBlocks(updated) : setJapaneseBlocks(updated);
-  };
-
+  
+  
   const handleCaretChange = (e) => {
     let target = e.target;
     while (target && target.dataset?.index === undefined) {
