@@ -1,3 +1,5 @@
+// NOTE: This is your updated App.js with manual linking and page range selection
+
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
@@ -24,6 +26,10 @@ function App() {
   const [useSkipWords, setUseSkipWords] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
   const [useCustomPrompt, setUseCustomPrompt] = useState(false);
+  const [startPage, setStartPage] = useState(1);
+  const [endPage, setEndPage] = useState(9999);
+  const [selectedForLinking, setSelectedForLinking] = useState(null);
+  const [linkedPairs, setLinkedPairs] = useState({});
 
   const originalRef = useRef(null);
   const translatedRef = useRef(null);
@@ -78,6 +84,8 @@ function App() {
     if (useSkipWords && skipWords.trim() !== "") {
       formData.append("skip_words", skipWords.trim());
     }
+    formData.append("start_page", startPage);
+    formData.append("end_page", endPage);
 
     setIsTranslating(true);
 
@@ -119,6 +127,20 @@ function App() {
       console.error("Re-translation error:", err);
       alert("Re-translation failed: " + JSON.stringify(err.response?.data || err.message));
     }
+  };
+
+  const handleStartLink = (index, isEnglish) => {
+    setSelectedForLinking({ index, isEnglish });
+  };
+
+  const handleLinkToOther = (index, isEnglish) => {
+    if (!selectedForLinking || selectedForLinking.isEnglish === isEnglish) return;
+
+    const enIndex = selectedForLinking.isEnglish ? selectedForLinking.index : index;
+    const jpIndex = selectedForLinking.isEnglish ? index : selectedForLinking.index;
+
+    setLinkedPairs((prev) => ({ ...prev, [enIndex]: jpIndex }));
+    setSelectedForLinking(null);
   };
 
   const handleBlur = (index, isEnglish) => {
@@ -216,8 +238,13 @@ function App() {
     return blocks.map((s, i) => (
       <div
         key={`${isEnglish ? "eng" : "jp"}-${i}`}
-        className={`block ${i === activeIndex ? "highlighted" : ""}`}
+        className={`block ${i === activeIndex ? "highlighted" : ""} ${selectedForLinking?.index === i && selectedForLinking?.isEnglish === isEnglish ? "linking" : ""} ${linkedPairs[isEnglish ? i : Object.keys(linkedPairs).find(key => linkedPairs[key] === i)] !== undefined ? "linked" : ""}`}
         data-index={i}
+        onClick={() => {
+          if (selectedForLinking && selectedForLinking.isEnglish !== isEnglish) {
+            handleLinkToOther(i, isEnglish);
+          }
+        }}
       >
         <div
           ref={(el) => {
@@ -228,7 +255,6 @@ function App() {
           onClick={handleCaretChange}
           onKeyUp={handleCaretChange}
           onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}
-          onInput={() => {}}
           onBlur={() => handleBlur(i, isEnglish)}
           className="editable"
           data-index={i}
@@ -246,13 +272,23 @@ function App() {
               </button>
             )}
             {isEnglish ? (
-              <button onClick={() => retranslateBlock(i)} className="btn-action">
-                <RefreshCw size={14} />
-              </button>
+              <>
+                <button onClick={() => retranslateBlock(i)} className="btn-action">
+                  <RefreshCw size={14} />
+                </button>
+                <button onClick={() => handleStartLink(i, true)} className="btn-action">
+                  🔗
+                </button>
+              </>
             ) : (
-              <button onClick={() => deleteBlock(i, false)} className="btn-action">
-                <Trash2 size={14} />
-              </button>
+              <>
+                <button onClick={() => deleteBlock(i, false)} className="btn-action">
+                  <Trash2 size={14} />
+                </button>
+                <button onClick={() => handleStartLink(i, false)} className="btn-action">
+                  🔗
+                </button>
+              </>
             )}
           </div>
         )}
@@ -270,6 +306,13 @@ function App() {
       <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
         <div className="form-group">
           <input type="file" onChange={handleFileChange} accept=".pdf" />
+
+          <label>Start Page</label>
+          <input type="number" value={startPage} onChange={(e) => setStartPage(Number(e.target.value))} />
+
+          <label>End Page</label>
+          <input type="number" value={endPage} onChange={(e) => setEndPage(Number(e.target.value))} />
+
           <label className="form-check">
             <input type="checkbox" checked={useSkipWords} onChange={(e) => setUseSkipWords(e.target.checked)} />
             Skip Words
