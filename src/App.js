@@ -144,16 +144,13 @@ function App() {
       const textToMove = updatedJP[jpIndex];
   
       if (jpIndex < enIndex) {
-        // Moving downward
-        updatedJP.splice(jpIndex, 1);          // remove JP block from old position
-        updatedJP.splice(enIndex - 1, 0, textToMove); // insert at enIndex-1 (because after removal, indexes shifted)
+        updatedJP.splice(jpIndex, 1);
+        updatedJP.splice(enIndex - 1, 0, textToMove);
       } else if (jpIndex > enIndex) {
-        // Moving upward
-        updatedJP.splice(jpIndex, 1);          // remove JP block from old position
-        updatedJP.splice(enIndex, 0, textToMove);  // insert at enIndex
+        updatedJP.splice(jpIndex, 1);
+        updatedJP.splice(enIndex, 0, textToMove);
       }
   
-      // If number of JP blocks is now less than EN blocks, add an empty block at the end
       if (updatedJP.length < englishBlocks.length) {
         updatedJP.push("");
       }
@@ -161,6 +158,7 @@ function App() {
       return updatedJP;
     });
   
+    setActiveIndex(enIndex); // ✅ VERY IMPORTANT
     setSelectedForLinking(null);
   };
   
