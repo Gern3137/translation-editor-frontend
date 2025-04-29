@@ -244,12 +244,12 @@ function App() {
 
   const renderEditorBlock = (blocks, isEnglish) => {
     const refMap = isEnglish ? englishRefs.current : japaneseRefs.current;
+  
     return blocks.map((s, i) => (
       <div
         key={`${isEnglish ? "eng" : "jp"}-${i}`}
         className={`block ${i === activeIndex ? "highlighted" : ""}`}
         data-index={i}
-        onClick={() => handleBlockClick(i, isEnglish)}
       >
         <div
           ref={(el) => {
@@ -257,6 +257,7 @@ function App() {
           }}
           contentEditable
           suppressContentEditableWarning
+          onClick={() => handleBlockClick(i, isEnglish)}   // 👈 moved onClick HERE!
           onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}
           onBlur={() => handleBlur(i, isEnglish)}
           className="editable"
@@ -264,6 +265,7 @@ function App() {
         >
           {s}
         </div>
+  
         {activeIndex === i && (
           <div className="btn-group">
             <button onClick={() => splitBlock(i, isEnglish)} className="btn-action">
@@ -297,14 +299,6 @@ function App() {
         )}
       </div>
     ));
-  };
-  
-  const handleBlockClick = (index, isEnglish) => {
-    if (selectedForLinking) {
-      handleLinkToOther(index, isEnglish);
-    } else {
-      setActiveIndex(index);
-    }
   };
   
 
