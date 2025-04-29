@@ -247,13 +247,9 @@ function App() {
     return blocks.map((s, i) => (
       <div
         key={`${isEnglish ? "eng" : "jp"}-${i}`}
-        className={`block ${i === activeIndex ? "highlighted" : ""} ${selectedForLinking?.index === i && selectedForLinking?.isEnglish === isEnglish ? "linking" : ""} ${linkedPairs[isEnglish ? i : Object.keys(linkedPairs).find(key => linkedPairs[key] === i)] !== undefined ? "linked" : ""}`}
+        className={`block ${i === activeIndex ? "highlighted" : ""}`}
         data-index={i}
-        onClick={() => {
-          if (selectedForLinking && selectedForLinking.isEnglish !== isEnglish) {
-            handleLinkToOther(i, isEnglish);
-          }
-        }}
+        onClick={() => handleBlockClick(i, isEnglish)}
       >
         <div
           ref={(el) => {
@@ -261,8 +257,6 @@ function App() {
           }}
           contentEditable
           suppressContentEditableWarning
-          onClick={handleCaretChange}
-          onKeyUp={handleCaretChange}
           onKeyDown={(e) => handleKeyDown(e, i, isEnglish)}
           onBlur={() => handleBlur(i, isEnglish)}
           className="editable"
@@ -304,6 +298,15 @@ function App() {
       </div>
     ));
   };
+  
+  const handleBlockClick = (index, isEnglish) => {
+    if (selectedForLinking) {
+      handleLinkToOther(index, isEnglish);
+    } else {
+      setActiveIndex(index);
+    }
+  };
+  
 
   return (
     <div className="container">
